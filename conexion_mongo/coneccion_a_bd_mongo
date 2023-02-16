@@ -1,0 +1,59 @@
+package main
+
+//Ejemplo de como conectar la base de datos mongodb
+import (
+	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func main() {
+	// opciones de cliente
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+
+	// Conexion a mongo
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// verificar conexion
+	err = client.Ping(context.Background(), nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Acceder  a la colexion
+	collection := client.Database("test").Collection("users")
+
+	// Ddefinir la consulta
+	filter := bson.M{"name": "John"}
+
+	// filtrarla
+	cursor, err := collection.Find(context.Background(), filter)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		// decodificando el documento
+		var user User
+		err := cursor.Decode(&user)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		// errores con el usuario
+	}
+
+	if err := cursor.Err(); err != nil {
+		fmt.Println(err)
+		return
+	}
+}
